@@ -1,4 +1,4 @@
-import { Queue } from "bullmq";
+import { Queue, QueueScheduler } from "bullmq";
 import Container from "typedi";
 import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from "./config/env";
 import { QueueMonitorService } from "./modules/queue-monitor/queue-monito.service";
@@ -18,6 +18,5 @@ export const initializeQueues = () => {
   });
 
   queueMonitorService.setQueues(queues);
-
   return queues;
 };

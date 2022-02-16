@@ -6,5 +6,5 @@ export class GetJobListQuery extends PaginationParams {
   queueName: string;
 
   @IsString()
-  jobType: string;
+  jobTypes: string;
 }

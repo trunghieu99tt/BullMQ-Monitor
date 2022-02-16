@@ -1,5 +1,6 @@
-import { JobType } from "bullmq";
 import {
+  Body,
+  BodyParam,
   Controller,
   Get,
   JsonController,
@@ -21,6 +22,7 @@ export class QueueMonitorController {
 
   @Get()
   async getAllQueuesInfo() {
+    console.debug("getAllQueuesInfo");
     return this.queueMonitorService.getQueues();
   }
 
@@ -29,28 +31,33 @@ export class QueueMonitorController {
     return this.queueMonitorService.getRedisInfo();
   }
 
-  @Get("/:queueName/job-list")
-  async getJobList(@QueryParams() queryParams: GetJobListQuery) {
-    return this.queueMonitorService.getJobsByType(
-      queryParams.queueName,
-      queryParams.jobType as JobType,
-      queryParams.page,
-      queryParams.pageSize
+  @Post("/job-list")
+  async getJobList(@Body() getJobListBody: GetJobListQuery) {
+    console.log("getJobListBody", getJobListBody);
+    console.debug(`getJobList: ${getJobListBody.queueName}`);
+    return this.queueMonitorService.getJobsByTypes(
+      getJobListBody.queueName,
+      getJobListBody.jobTypes,
+      getJobListBody.page,
+      getJobListBody.pageSize
     );
   }
 
   @Get("/:queueName")
   async getJobCounts(@Param("queueName") queueName: string) {
+    console.debug(`getJobCounts: ${queueName}`);
     return this.queueMonitorService.getJobCounts(queueName);
   }
 
   @Post("/:queueName/pause")
   async pauseQueue(@Param("queueName") queueName: string) {
+    console.debug(`pauseQueue: ${queueName}`);
     return this.queueMonitorService.pauseQueue(queueName);
   }
 
   @Post("/:queueName/resume")
   async resumeQueue(@Param("queueName") queueName: string) {
+    console.debug(`resumeQueue: ${queueName}`);
     return this.queueMonitorService.resumeQueue(queueName);
   }
 
@@ -75,6 +82,7 @@ export class QueueMonitorController {
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string
   ) {
+    console.debug(`getJobDetail: ${queueName} ${jobId}`);
     return this.queueMonitorService.getJobDetail(queueName, jobId);
   }
 }

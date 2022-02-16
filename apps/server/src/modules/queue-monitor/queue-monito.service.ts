@@ -2,9 +2,12 @@ import { Job, JobType, Queue } from "bullmq";
 import { plainToClass } from "class-transformer";
 import { Service } from "typedi";
 import redisInfo from "redis-info";
-import { NotFoundError } from "routing-controllers";
+import { CookieParam, NotFoundError } from "routing-controllers";
 
 import { GetQueuesOutputDto } from "./dtos/get-queues-output.dto";
+import { JobStatus } from "bull";
+import { GetJobListOutput } from "./dtos/get-job-list-output.dto";
+import { ObjectTool } from "../../common/tools/object.tool";
 
 @Service()
 export class QueueMonitorService {
@@ -42,10 +45,10 @@ export class QueueMonitorService {
   async getQueues(): Promise<GetQueuesOutputDto[]> {
     return Promise.all(
       this.queues.map(async (queue: Queue) => {
-        const numberOfJobs = await queue.getJobCounts();
+        const jobs = await queue.getJobCounts();
         return plainToClass(GetQueuesOutputDto, {
           name: queue.name,
-          numberOfJobs,
+          ...jobs,
           isPaused: queue.isPaused(),
         });
       })
@@ -53,7 +56,7 @@ export class QueueMonitorService {
   }
 
   async getRedisInfo(): Promise<any> {
-    if (this.queues.length > 0) {
+    if (this.queues?.length > 0) {
       const firstQueue = this.queues[0];
       const client = await firstQueue.client;
       const rawInfo = await client.info();
@@ -73,22 +76,50 @@ export class QueueMonitorService {
     );
   }
 
-  async getJobsByType(
+  async getJobsByTypes(
     queueName: string,
-    type: JobType,
+    types: string,
     page: number,
     pageSize: number
-  ): Promise<any> {
-    const queue = this.getQueue(queueName);
-    const numberOfJobs = await queue.getJobCountByTypes(type);
-    const totalPages = Math.ceil(numberOfJobs / pageSize);
-    if (page > totalPages) {
-      page = totalPages;
-    }
-    const start = (page - 1) * pageSize;
-    const end = Math.min(start + pageSize, numberOfJobs);
+  ): Promise<GetJobListOutput[]> {
+    try {
+      const queue = this.getQueue(queueName);
+      if (queue) {
+        let jobTypes: JobStatus[] = [];
+        if (types === "*") {
+          jobTypes = ["waiting", "active", "completed", "failed", "delayed"];
+        } else {
+          jobTypes = types
+            .split(",")
+            .map((type: string) => type.trim()) as JobStatus[];
+        }
+        console.log("jobTypes", jobTypes);
+        const numberOfJobs = await queue.getJobCountByTypes(...jobTypes);
+        const totalPages = Math.ceil(numberOfJobs / pageSize);
+        if (page > totalPages) {
+          page = totalPages;
+        }
+        const start = (page - 1) * pageSize;
+        const end = Math.min(start + pageSize, numberOfJobs);
 
-    return queue.getJobs(type, start, end);
+        console.log("queue", queue.name);
+        const jobs = await queue.getJobs("waiting", 0, 10);
+        console.log("jobs", jobs);
+
+        return jobs.map((job: Job) => {
+          const data = job.data;
+          return plainToClass(GetJobListOutput, {
+            ...ObjectTool.omit(job, ["queue", "data", "opts"]),
+            data: JSON.stringify(data),
+            ...job.opts,
+          });
+        });
+      }
+    } catch (error) {
+      console.error(`Error: ${error}`);
+    }
+
+    throw new NotFoundError(`Queue ${queueName} not found`);
   }
 
   async getJobDetail(queueName: string, jobId: string): Promise<Job> {
