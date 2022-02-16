@@ -2,7 +2,7 @@ import { Job, JobType, Queue } from "bullmq";
 import { plainToClass } from "class-transformer";
 import { Service } from "typedi";
 import redisInfo from "redis-info";
-import { CookieParam, NotFoundError } from "routing-controllers";
+import { NotFoundError } from "routing-controllers";
 
 import { GetQueuesOutputDto } from "./dtos/get-queues-output.dto";
 import { JobStatus } from "bull";
@@ -81,7 +81,13 @@ export class QueueMonitorService {
     types: string,
     page: number,
     pageSize: number
-  ): Promise<GetJobListOutput[]> {
+  ): Promise<{
+    data: GetJobListOutput[];
+    meta: {
+      total: number;
+      page: number;
+    };
+  }> {
     try {
       const queue = this.getQueue(queueName);
       if (queue) {
@@ -103,10 +109,10 @@ export class QueueMonitorService {
         const end = Math.min(start + pageSize, numberOfJobs);
 
         console.log("queue", queue.name);
-        const jobs = await queue.getJobs("waiting", 0, 10);
+        const jobs = await queue.getJobs(jobTypes, start, end);
         console.log("jobs", jobs);
 
-        return jobs.map((job: Job) => {
+        const data = jobs.map((job: Job) => {
           const data = job.data;
           return plainToClass(GetJobListOutput, {
             ...ObjectTool.omit(job, ["queue", "data", "opts"]),
@@ -114,6 +120,14 @@ export class QueueMonitorService {
             ...job.opts,
           });
         });
+
+        return {
+          data,
+          meta: {
+            total: numberOfJobs,
+            page,
+          },
+        };
       }
     } catch (error) {
       console.error(`Error: ${error}`);

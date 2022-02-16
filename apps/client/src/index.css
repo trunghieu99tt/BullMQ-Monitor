@@ -3,3 +3,11 @@ th,
 td {
   border: 1px solid #000;
 }
+
+p {
+  margin: 0;
+}
+
+button:disabled {
+  opacity: 0.5;
+}

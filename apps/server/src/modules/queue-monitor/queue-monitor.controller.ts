@@ -33,8 +33,6 @@ export class QueueMonitorController {
 
   @Post("/job-list")
   async getJobList(@Body() getJobListBody: GetJobListQuery) {
-    console.log("getJobListBody", getJobListBody);
-    console.debug(`getJobList: ${getJobListBody.queueName}`);
     return this.queueMonitorService.getJobsByTypes(
       getJobListBody.queueName,
       getJobListBody.jobTypes,

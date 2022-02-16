@@ -2,26 +2,31 @@ import React from "react";
 import { JOB_TYPES } from "../../constants";
 import { useQueueDetail } from "./useQueueDetail";
 
+import classes from "./queue-detail.module.css";
+import Pagination from "../../components/Pagination";
+
 const QueueDetail = () => {
   const {
     data,
+    meta,
     page,
-    pageSize,
-    setPage,
-    setPageSize,
-    setTypes,
     types,
+    activeIds,
     queueName,
+    typeSelectRef,
+
+    onFilter,
+    onChangePage,
+    onChangePageSize,
+    toggleActiveJobData,
   } = useQueueDetail();
 
-  console.log("data", data);
-
   return (
-    <section>
+    <section className={classes.root}>
       <div></div>
       <header>
         <h1>Queue {queueName}</h1>
-        <select multiple>
+        <select multiple ref={typeSelectRef}>
           <option value="*">All</option>
           {JOB_TYPES.map((type: string, idx: number) => {
             return (
@@ -31,10 +36,11 @@ const QueueDetail = () => {
             );
           })}
         </select>
+        <button onClick={onFilter}>Filter</button>
       </header>
       <main>
-        <table>
-          <thead>
+        <table className={classes.table}>
+          <thead className={classes.thead}>
             <tr>
               <th
                 style={{
@@ -65,23 +71,32 @@ const QueueDetail = () => {
                     <td>{job.delay}</td>
                     <td>{job.attempt}</td>
                     <td>
+                      <button onClick={() => toggleActiveJobData(job.id)}>
+                        Detail
+                      </button>
                       <button>Edit</button>
-                      <button>Detail</button>
                       <button>Delete</button>
                     </td>
                   </tr>
-                  <tr>
-                    <td colSpan={8}>
-                      <code lang="cpp">
-                        <span>Cout</span>
-                      </code>
-                    </td>
-                  </tr>
+                  {activeIds?.includes(job.id) && (
+                    <tr>
+                      <td colSpan={100}>
+                        <div className={classes.jobDetailData}>{job.data}</div>
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               );
             })}
           </tbody>
-          <tfoot></tfoot>
+          <tfoot className={classes.tfoot}>
+            <Pagination
+              page={page}
+              total={meta?.total || 0}
+              onChangePage={onChangePage}
+              onChangePageSize={onChangePageSize}
+            />
+          </tfoot>
         </table>
       </main>
     </section>

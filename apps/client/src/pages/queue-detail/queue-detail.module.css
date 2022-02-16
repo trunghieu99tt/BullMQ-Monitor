@@ -1,0 +1,30 @@
+.root {
+  margin: 1rem auto;
+}
+
+.table {
+  display: inline-block;
+  max-height: 30rem;
+  overflow: auto;
+}
+
+.tfoot {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+}
+
+.thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+}
+
+.jobDetailData {
+  max-height: 5rem;
+  overflow: auto;
+  padding: 0.5rem;
+}
