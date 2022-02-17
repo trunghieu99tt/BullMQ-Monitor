@@ -1,41 +1,45 @@
-import { ChangeEvent, memo, useEffect, useRef, useState } from "react";
+import { ChangeEvent, memo, useEffect, useState } from "react";
 
 type Props = {
   page: number;
   total: number;
+  pageSize: number;
   onChangePage: (page: number) => void;
   onChangePageSize: (pageSize: number) => void;
 };
 
-const Pagination = ({ page, total, onChangePageSize, onChangePage }: Props) => {
-  const [pageSize, setPageSize] = useState<number>(20);
-  const pageNumberRef = useRef<HTMLInputElement>(null);
+const Pagination = ({
+  page,
+  total,
+  onChangePageSize,
+  onChangePage,
+  pageSize,
+}: Props) => {
+  const [currentPage, setCurrentPage] = useState<number>(page);
 
   const onChangePageSizeOption = (e: ChangeEvent<HTMLSelectElement>) => {
-    const newPageSize = parseInt(e.target.value, 10);
-    setPageSize(newPageSize);
-    onChangePageSize(parseInt(e.target.value));
+    onChangePageSize(parseInt(e.target.value, 10));
+  };
+
+  const onChangeGoToPage = (e: ChangeEvent<HTMLInputElement>) => {
+    setCurrentPage(parseInt(e.target.value, 10));
+  };
+
+  const onChangePageNavigation = (newValue: number) => {
+    onChangePage(newValue);
   };
 
   const onGoToPage = () => {
-    if (pageNumberRef?.current) {
-      onChangePage(parseInt(pageNumberRef?.current?.value, 10));
-    }
+    onChangePage(currentPage);
   };
 
   useEffect(() => {
-    if (pageNumberRef?.current) {
-      pageNumberRef.current.value = page + "";
-    }
-  }, [page, total]);
+    setCurrentPage(page);
+  }, [page]);
 
   useEffect(() => {
-    if (pageNumberRef?.current) {
-      const currentPage = parseInt(pageNumberRef?.current?.value, 10);
-      const totalPages = Math.ceil(total / pageSize);
-      pageNumberRef.current.value = Math.min(currentPage, totalPages) + "";
-    }
-  }, [pageSize, total]);
+    console.log("Pagination re-rendered");
+  });
 
   const pageCount = Math.ceil(total / pageSize);
   const shouldDisablePrevAndFirst = page === 1;
@@ -46,29 +50,35 @@ const Pagination = ({ page, total, onChangePageSize, onChangePage }: Props) => {
       <div>
         <button
           disabled={shouldDisablePrevAndFirst}
-          onClick={() => onChangePage(1)}
+          onClick={() => onChangePageNavigation(1)}
         >
           {"<<"}{" "}
         </button>
         <button
           disabled={shouldDisablePrevAndFirst}
-          onClick={() => onChangePage(Math.max(1, page - 1))}
+          onClick={() => onChangePageNavigation(Math.max(1, page - 1))}
         >
           {"<"}{" "}
         </button>
         <button
           disabled={shouldDisableNextAndLast}
-          onClick={() => onChangePage(Math.min(pageCount, page + 1))}
+          onClick={() => onChangePageNavigation(Math.min(pageCount, page + 1))}
         >
           {">"}{" "}
         </button>
         <button
           disabled={shouldDisableNextAndLast}
-          onClick={() => onChangePage(pageCount)}
+          onClick={() => onChangePageNavigation(pageCount)}
         >
           {">>"}{" "}
         </button>
-        <input type="number" min={1} max={pageCount} ref={pageNumberRef} />
+        <input
+          type="number"
+          min={1}
+          max={pageCount}
+          value={currentPage}
+          onChange={onChangeGoToPage}
+        />
         <button onClick={onGoToPage}>Go</button>
       </div>
       <select onChange={onChangePageSizeOption}>

@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQueue } from "../../talons/useQueue";
 
@@ -19,24 +19,30 @@ export const useQueueDetail = () => {
     page: 1,
   });
 
-  const typeSelectRef = useRef<HTMLSelectElement>(null);
-
-  const fetchQueueJob = useCallback(async () => {
-    if (queueName) {
-      const { data, meta } = await getQueueJobs(
-        queueName,
-        types,
-        page,
-        pageSize
-      );
-      setData(data);
-      setMeta(meta);
-    }
-  }, [queueName, types, page, pageSize]);
-
   useEffect(() => {
-    fetchQueueJob();
-  }, [page, pageSize, types]);
+    fetchQueueJob(queueName);
+  }, [queueName]);
+
+  const fetchQueueJob = useCallback(
+    async (queueName = "", types = ["*"], page = 1, pageSize = 20) => {
+      if (queueName) {
+        const { data, meta } = await getQueueJobs(
+          queueName,
+          types,
+          page,
+          pageSize
+        );
+        setData(data);
+        setMeta(meta);
+        const totalPages = Math.ceil(meta.total / pageSize);
+        console.log("totalPages", totalPages);
+        if (page > totalPages && totalPages > 0) {
+          setPage(totalPages);
+        }
+      }
+    },
+    []
+  );
 
   const toggleActiveJobData = (id: string) => {
     if (activeIds.includes(id)) {
@@ -46,24 +52,38 @@ export const useQueueDetail = () => {
     }
   };
 
-  const onChangePageSize = useCallback((newPageSize: number) => {
-    setPageSize(newPageSize);
-  }, []);
+  const onChangePageSize = useCallback(
+    (newPageSize: number) => {
+      setPageSize(newPageSize);
+      fetchQueueJob(queueName, types, page, newPageSize);
+    },
+    [queueName, page, types]
+  );
 
-  const onChangePage = useCallback((page: number) => {
-    setPage(page);
-  }, []);
+  const onChangePage = useCallback(
+    (newPage: number) => {
+      if (newPage !== page) {
+        setPage(newPage);
+        fetchQueueJob(queueName, types, newPage, pageSize);
+      }
+    },
+    [queueName, page, types, pageSize]
+  );
 
-  const onFilter = useCallback(() => {
-    const selectedOptions =
-      (typeSelectRef?.current?.selectedOptions &&
-        Array.from(
-          typeSelectRef.current?.selectedOptions,
-          (optionEl) => optionEl.value
-        )) ||
-      [];
-    setTypes(selectedOptions);
-  }, []);
+  const toggleType = useCallback(
+    (type: string, shouldIgnoreAll = false) => {
+      let newTypes = [...types];
+      if (types.includes(type)) {
+        newTypes = newTypes.filter((item) => item !== type);
+      } else {
+        newTypes.push(type);
+      }
+      
+      setTypes(newTypes);
+      fetchQueueJob(queueName, newTypes, page, pageSize);
+    },
+    [queueName, page, types, pageSize]
+  );
 
   return {
     data,
@@ -73,11 +93,10 @@ export const useQueueDetail = () => {
     pageSize,
     activeIds,
     queueName,
-    typeSelectRef,
 
-    onFilter,
     setPage,
     setTypes,
+    toggleType,
     setPageSize,
     onChangePage,
     onChangePageSize,

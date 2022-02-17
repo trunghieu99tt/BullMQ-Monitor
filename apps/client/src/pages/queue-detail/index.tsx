@@ -1,6 +1,7 @@
 import React from "react";
 import { JOB_TYPES } from "../../constants";
 import { useQueueDetail } from "./useQueueDetail";
+import cn from "classnames";
 
 import classes from "./queue-detail.module.css";
 import Pagination from "../../components/Pagination";
@@ -11,11 +12,11 @@ const QueueDetail = () => {
     meta,
     page,
     types,
+    pageSize,
     activeIds,
     queueName,
-    typeSelectRef,
 
-    onFilter,
+    toggleType,
     onChangePage,
     onChangePageSize,
     toggleActiveJobData,
@@ -26,17 +27,22 @@ const QueueDetail = () => {
       <div></div>
       <header>
         <h1>Queue {queueName}</h1>
-        <select multiple ref={typeSelectRef}>
-          <option value="*">All</option>
+        <div>
           {JOB_TYPES.map((type: string, idx: number) => {
             return (
-              <option value={type} key={`${type}-${idx}`}>
+              <button
+                value={type}
+                key={`${type}-${idx}`}
+                onClick={() => toggleType(type)}
+                className={cn(classes.typeBtn, {
+                  [classes.active]: types.includes(type),
+                })}
+              >
                 {type}
-              </option>
+              </button>
             );
           })}
-        </select>
-        <button onClick={onFilter}>Filter</button>
+        </div>
       </header>
       <main>
         <table className={classes.table}>
@@ -57,7 +63,7 @@ const QueueDetail = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((job: any, idx: number) => {
+            {data.map((job: any) => {
               return (
                 <React.Fragment>
                   <tr key={`${job.id}`}>
@@ -90,12 +96,15 @@ const QueueDetail = () => {
             })}
           </tbody>
           <tfoot className={classes.tfoot}>
-            <Pagination
-              page={page}
-              total={meta?.total || 0}
-              onChangePage={onChangePage}
-              onChangePageSize={onChangePageSize}
-            />
+            {data?.length > 0 && (
+              <Pagination
+                pageSize={pageSize}
+                page={page}
+                total={meta?.total || 0}
+                onChangePage={onChangePage}
+                onChangePageSize={onChangePageSize}
+              />
+            )}
           </tfoot>
         </table>
       </main>
