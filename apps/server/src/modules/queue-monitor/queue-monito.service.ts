@@ -1,4 +1,4 @@
-import { Job, JobType, Queue } from "bullmq";
+import { Job, Queue } from "bullmq";
 import { plainToClass } from "class-transformer";
 import { Service } from "typedi";
 import redisInfo from "redis-info";
@@ -9,9 +9,12 @@ import { JobStatus } from "bull";
 import { GetJobListOutput } from "./dtos/get-job-list-output.dto";
 import { ObjectTool } from "../../common/tools/object.tool";
 
+import { LruCache } from "utils";
+
 @Service()
 export class QueueMonitorService {
   queues: Queue[] = [];
+  cache = new LruCache<any>();
 
   constructor() {}
 

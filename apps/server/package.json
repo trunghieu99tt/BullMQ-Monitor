@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/redis-info": "^3.0.0",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "utils": "*"
   }
 }
