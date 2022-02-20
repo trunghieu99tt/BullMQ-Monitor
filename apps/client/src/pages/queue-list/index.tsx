@@ -1,49 +1,72 @@
+import { Button, Table } from "antd";
 import { Link } from "react-router-dom";
+import { IJob } from "../../types/model.type";
 import { useQueueListPage } from "./useQueueListPage";
+
+import classes from "./queue-list.module.css";
+
+const columns = [
+  {
+    title: "Name",
+    dataIndex: "name",
+  },
+  {
+    title: "Active",
+    dataIndex: "active",
+  },
+  {
+    title: "Completed",
+    dataIndex: "completed",
+  },
+  {
+    title: "Delayed",
+    dataIndex: "delayed",
+  },
+  {
+    title: "Failed",
+    dataIndex: "failed",
+  },
+  {
+    title: "Paused",
+    dataIndex: "paused",
+  },
+  {
+    title: "Waiting",
+    dataIndex: "waiting",
+  },
+  {
+    title: "Is Running",
+    dataIndex: "isPaused",
+    render: (isPaused: boolean) => {
+      return <span>{isPaused ? "No" : "Yes"}</span>;
+    },
+  },
+  {
+    title: "Actions",
+    dataIndex: "actions",
+    render: (_: any, record: IJob) => {
+      return (
+        <Button type="primary" shape="round">
+          <Link to={`/${record.name}`}>Detail</Link>
+        </Button>
+      );
+    },
+  },
+];
 
 const QueueList = () => {
   const { queues } = useQueueListPage();
 
   return (
-    <section>
-      QueueList
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Active</th>
-              <th>Completed</th>
-              <th>Delayed</th>
-              <th>Failed</th>
-              <th>Paused</th>
-              <th>Waiting</th>
-              <th>Is Running</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {queues.map((queue: any, idx: number) => {
-              return (
-                <tr key={`${queue.name}-${idx}`}>
-                  <td>{queue.name}</td>
-                  <td>{queue.active}</td>
-                  <td>{queue.completed}</td>
-                  <td>{queue.delayed}</td>
-                  <td>{queue.failed}</td>
-                  <td>{queue.paused}</td>
-                  <td>{queue.waiting}</td>
-                  <td>{queue.isPaused ? "No" : "Yes"}</td>
-                  <button>
-                    <Link to={`/${queue.name}`}>Detail</Link>
-                  </button>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <main className={classes.main}>
+      <Table
+        title={() => "Queue List"}
+        columns={columns}
+        dataSource={queues}
+        size="middle"
+        pagination={false}
+      />
+    </main>
   );
 };
 

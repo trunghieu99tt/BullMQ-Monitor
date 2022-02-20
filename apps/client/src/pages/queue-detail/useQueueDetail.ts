@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useQueue } from "../../talons/useQueue";
+import { IJob } from "../../types/model.type";
 
 export const useQueueDetail = () => {
   const { queueName } = useParams();
-  const { getQueueJobs, deleteJob } = useQueue();
+  const { getQueueJobs, deleteJob, updateJob } = useQueue();
 
   const [data, setData] = useState<any[]>([]);
-  const [page, setPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(20);
   const [types, setTypes] = useState<string[]>(["*"]);
-  const [pageSize, setPageSize] = useState<number>(20);
   const [activeIds, setActiveIds] = useState<string[]>([]);
   const [meta, setMeta] = useState<{
     total: number;
@@ -18,6 +19,9 @@ export const useQueueDetail = () => {
     total: 0,
     page: 1,
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [editingJob, setEditingJob] = useState<IJob | null>(null);
+  const [updatedJobData, setUpdatedJobData] = useState<any>({});
 
   useEffect(() => {
     fetchQueueJob(queueName);
@@ -34,10 +38,10 @@ export const useQueueDetail = () => {
         );
         setData(data);
         setMeta(meta);
-        const totalPages = Math.ceil(meta.total / pageSize);
+        const totalPages = Math.ceil(meta.total / currentPageSize);
         console.log("totalPages", totalPages);
         if (page > totalPages && totalPages > 0) {
-          setPage(totalPages);
+          setCurrentPage(totalPages);
         }
       }
     },
@@ -52,23 +56,18 @@ export const useQueueDetail = () => {
     }
   };
 
-  const onChangePageSize = useCallback(
-    (newPageSize: number) => {
-      setPageSize(newPageSize);
-      fetchQueueJob(queueName, types, page, newPageSize);
-    },
-    [queueName, page, types]
-  );
-
-  const onChangePage = useCallback(
-    (newPage: number) => {
-      if (newPage !== page) {
-        setPage(newPage);
-        fetchQueueJob(queueName, types, newPage, pageSize);
+  const onChangePagination = (page: number, pageSize: number) => {
+    if (page !== currentPage || pageSize !== currentPageSize) {
+      if (page !== currentPage) {
+        setCurrentPage(page);
       }
-    },
-    [queueName, page, types, pageSize]
-  );
+
+      if (currentPage !== pageSize) {
+        setCurrentPageSize(pageSize);
+      }
+      fetchQueueJob(queueName, types, page, pageSize);
+    }
+  };
 
   const toggleType = useCallback(
     (type: string, shouldIgnoreAll = false) => {
@@ -80,9 +79,9 @@ export const useQueueDetail = () => {
       }
 
       setTypes(newTypes);
-      fetchQueueJob(queueName, newTypes, page, pageSize);
+      fetchQueueJob(queueName, newTypes, currentPage, currentPageSize);
     },
-    [queueName, page, types, pageSize]
+    [queueName, currentPage, types, currentPageSize]
   );
 
   const removeJob = useCallback(
@@ -90,30 +89,49 @@ export const useQueueDetail = () => {
       if (queueName) {
         const isDeleteOk = await deleteJob(queueName, jobId);
         if (isDeleteOk) {
-          setPage(1);
-          fetchQueueJob(queueName, types, 1, pageSize);
+          setCurrentPage(1);
+          fetchQueueJob(queueName, types, 1, currentPageSize);
         }
       }
     },
     [queueName]
   );
 
+  const updateJobData = useCallback(
+    (queueName: string, jobId: string, newJobData: any) => {
+      updateJob(queueName, jobId, newJobData);
+    },
+    []
+  );
+
+  const onChangeJobData = (data: any) => {
+    setUpdatedJobData(data);
+  };
+
+  const onCancelEdit = () => {
+    setEditingJob(null);
+    setUpdatedJobData({});
+  };
+
   return {
     data,
-    page,
     meta,
     types,
-    pageSize,
     activeIds,
     queueName,
+    editingJob,
+    currentPage,
+    currentPageSize,
+    updatedJobData,
 
-    setPage,
-    removeJob,
     setTypes,
+    removeJob,
     toggleType,
-    setPageSize,
-    onChangePage,
-    onChangePageSize,
+    onCancelEdit,
+    setEditingJob,
+    updateJobData,
+    onChangeJobData,
+    onChangePagination,
     toggleActiveJobData,
   };
 };
