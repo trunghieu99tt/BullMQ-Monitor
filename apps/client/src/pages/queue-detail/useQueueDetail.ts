@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useQueue } from "../../talons/useQueue";
 
 export const useQueueDetail = () => {
   const { queueName } = useParams();
-  const { getQueueJobs } = useQueue();
+  const { getQueueJobs, deleteJob } = useQueue();
 
   const [data, setData] = useState<any[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -78,11 +78,24 @@ export const useQueueDetail = () => {
       } else {
         newTypes.push(type);
       }
-      
+
       setTypes(newTypes);
       fetchQueueJob(queueName, newTypes, page, pageSize);
     },
     [queueName, page, types, pageSize]
+  );
+
+  const removeJob = useCallback(
+    async (jobId: string) => {
+      if (queueName) {
+        const isDeleteOk = await deleteJob(queueName, jobId);
+        if (isDeleteOk) {
+          setPage(1);
+          fetchQueueJob(queueName, types, 1, pageSize);
+        }
+      }
+    },
+    [queueName]
   );
 
   return {
@@ -95,6 +108,7 @@ export const useQueueDetail = () => {
     queueName,
 
     setPage,
+    removeJob,
     setTypes,
     toggleType,
     setPageSize,

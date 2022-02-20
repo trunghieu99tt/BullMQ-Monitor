@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router";
+import withLayout from "./layout";
 import QueueDetail from "./pages/queue-detail";
 import QueueList from "./pages/queue-list";
 
@@ -11,4 +12,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default withLayout(App);

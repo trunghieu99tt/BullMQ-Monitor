@@ -143,9 +143,15 @@ export class QueueMonitorService {
     return this.getJob(queueName, jobId);
   }
 
-  async removeJob(queueName: string, jobId: string): Promise<void> {
-    const job = await this.getJob(queueName, jobId);
-    await job.remove();
+  async removeJob(queueName: string, jobId: string): Promise<boolean> {
+    try {
+      const job = await this.getJob(queueName, jobId);
+      await job.remove();
+      return true;
+    } catch (error) {
+      console.error(`Error: ${error}`);
+      return false;
+    }
   }
 
   async retryJob(queueName: string, jobId: string): Promise<void> {
@@ -161,5 +167,10 @@ export class QueueMonitorService {
   async resumeQueue(queueName: string): Promise<void> {
     const queue = this.getQueue(queueName);
     await queue.resume();
+  }
+
+  async updateJob(queueName: string, jobId: string, data: any): Promise<void> {
+    const job = await this.getJob(queueName, jobId);
+    await job.update(data);
   }
 }

@@ -2,6 +2,7 @@ import {
   Body,
   BodyParam,
   Controller,
+  Delete,
   Get,
   JsonController,
   Param,
@@ -10,6 +11,7 @@ import {
 } from "routing-controllers";
 import Container, { Service } from "typedi";
 import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
+import { UpdateJobInput } from "./dtos/update-job-input.dto";
 import { QueueMonitorService } from "./queue-monito.service";
 
 @Controller("queue-monitor")
@@ -41,6 +43,15 @@ export class QueueMonitorController {
     );
   }
 
+  @Post("/update-job")
+  async updateJob(@Body() updateJobBody: UpdateJobInput) {
+    return this.queueMonitorService.updateJob(
+      updateJobBody.queueName,
+      updateJobBody.jobId,
+      updateJobBody.data
+    );
+  }
+
   @Get("/:queueName")
   async getJobCounts(@Param("queueName") queueName: string) {
     console.debug(`getJobCounts: ${queueName}`);
@@ -67,7 +78,7 @@ export class QueueMonitorController {
     return this.queueMonitorService.retryJob(queueName, jobId);
   }
 
-  @Post("/:queueName/:jobId/remove")
+  @Delete("/:queueName/:jobId")
   async removeJob(
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string

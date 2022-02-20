@@ -5,6 +5,7 @@ import cn from "classnames";
 
 import classes from "./queue-detail.module.css";
 import Pagination from "../../components/Pagination";
+import Job from "../../components/Job";
 
 const QueueDetail = () => {
   const {
@@ -13,13 +14,12 @@ const QueueDetail = () => {
     page,
     types,
     pageSize,
-    activeIds,
     queueName,
 
+    removeJob,
     toggleType,
     onChangePage,
     onChangePageSize,
-    toggleActiveJobData,
   } = useQueueDetail();
 
   return (
@@ -65,33 +65,11 @@ const QueueDetail = () => {
           <tbody>
             {data.map((job: any) => {
               return (
-                <React.Fragment>
-                  <tr key={`${job.id}`}>
-                    <td>
-                      <input type="checkbox" />
-                    </td>
-                    <td>{job.id}</td>
-                    <td>{job.status}</td>
-                    <td>{job.name}</td>
-                    <td>{job.timestamp}</td>
-                    <td>{job.delay}</td>
-                    <td>{job.attempt}</td>
-                    <td>
-                      <button onClick={() => toggleActiveJobData(job.id)}>
-                        Detail
-                      </button>
-                      <button>Edit</button>
-                      <button>Delete</button>
-                    </td>
-                  </tr>
-                  {activeIds?.includes(job.id) && (
-                    <tr>
-                      <td colSpan={100}>
-                        <div className={classes.jobDetailData}>{job.data}</div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
+                <Job
+                  key={`${queueName}-${job.id}`}
+                  job={job}
+                  removeJob={removeJob}
+                />
               );
             })}
           </tbody>
