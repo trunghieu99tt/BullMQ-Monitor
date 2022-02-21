@@ -1,5 +1,6 @@
 import { Button, Modal, PageHeader } from "antd";
 import React, { useCallback } from "react";
+import { Link } from "react-router-dom";
 import classes from "./header.module.css";
 import { useHeader } from "./useHeader";
 
@@ -28,7 +29,7 @@ const Header = () => {
   return (
     <React.Fragment>
       <PageHeader
-        title="Bull Monitor"
+        title={<Link to="/">Bull Monitor</Link>}
         extra={[
           <Button shape="round" type="primary" onClick={showRedisInfo}>
             Redis info

@@ -1,21 +1,11 @@
-import { useEffect, useState } from "react";
-import { useQueue } from "../../talons/useQueue";
-import { IRedisInfo } from "../../types/model.type";
+import { useState } from "react";
+import { useRecoilValue } from "recoil";
+import { redisState } from "../../states/redis.state";
 
 export const useHeader = () => {
-  const [redis, setRedis] = useState<IRedisInfo | null>(null);
+  const redis = useRecoilValue(redisState);
+
   const [showRedisInfo, setShowRedisInfo] = useState<boolean>(false);
-
-  const { getRedisDetail } = useQueue();
-
-  useEffect(() => {
-    fetchRedisInfo();
-  }, []);
-
-  const fetchRedisInfo = async (): Promise<void> => {
-    const data = await getRedisDetail();
-    setRedis(data);
-  };
 
   const toggleShowRedisInfo = () => setShowRedisInfo((v) => !v);
 

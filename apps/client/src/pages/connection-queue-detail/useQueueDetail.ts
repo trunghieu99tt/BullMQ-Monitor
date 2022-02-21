@@ -1,11 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { connectionSelectorByConnectionId } from "../../states/connection.state";
+import { redisState } from "../../states/redis.state";
 import { useQueue } from "../../talons/useQueue";
 import { IJob } from "../../types/model.type";
 
 export const useQueueDetail = () => {
-  const { queueName } = useParams();
-  const { getQueueJobs, deleteJob, updateJob } = useQueue();
+  const { queueName, connectionId } = useParams();
+  const connection = useRecoilValue(
+    connectionSelectorByConnectionId(connectionId)
+  );
+  const setRedis = useSetRecoilState(redisState);
+
+  const { getQueueJobs, deleteJob, updateJob } = useQueue({
+    connectionStr: `${connection?.host}:${connection?.port}`,
+  });
 
   const [data, setData] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -26,6 +36,12 @@ export const useQueueDetail = () => {
   useEffect(() => {
     fetchQueueJob(queueName);
   }, [queueName]);
+
+  useEffect(() => {
+    if (connection?.info) {
+      setRedis(connection?.info);
+    }
+  }, [connection]);
 
   const fetchQueueJob = useCallback(
     async (queueName = "", types = ["*"], page = 1, pageSize = 20) => {

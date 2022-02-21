@@ -1,18 +1,18 @@
 import {
   Body,
-  BodyParam,
   Controller,
   Delete,
   Get,
   JsonController,
   Param,
   Post,
-  QueryParams,
 } from "routing-controllers";
 import Container, { Service } from "typedi";
 import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
+import { JobActionInput } from "./dtos/job-action-input.dto";
+import { QueueActionInput } from "./dtos/queue-action-input.dto";
 import { UpdateJobInput } from "./dtos/update-job-input.dto";
-import { QueueMonitorService } from "./queue-monito.service";
+import { QueueMonitorService } from "./queue-monitor.service";
 
 @Controller("queue-monitor")
 @JsonController("/queue-monitor")
@@ -20,12 +20,6 @@ import { QueueMonitorService } from "./queue-monito.service";
 export class QueueMonitorController {
   constructor(private readonly queueMonitorService: QueueMonitorService) {
     this.queueMonitorService = Container.get(QueueMonitorService);
-  }
-
-  @Get()
-  async getAllQueuesInfo() {
-    console.debug("getAllQueuesInfo");
-    return this.queueMonitorService.getQueues();
   }
 
   @Get("/redis")
@@ -36,6 +30,7 @@ export class QueueMonitorController {
   @Post("/job-list")
   async getJobList(@Body() getJobListBody: GetJobListQuery) {
     return this.queueMonitorService.getJobsByTypes(
+      getJobListBody.connectionStr,
       getJobListBody.queueName,
       getJobListBody.jobTypes,
       getJobListBody.page,
@@ -45,53 +40,69 @@ export class QueueMonitorController {
 
   @Post("/update-job")
   async updateJob(@Body() updateJobBody: UpdateJobInput) {
+    const { connectionStr, data, jobId, queueName } = updateJobBody;
+
     return this.queueMonitorService.updateJob(
-      updateJobBody.queueName,
-      updateJobBody.jobId,
-      updateJobBody.data
+      connectionStr,
+      queueName,
+      jobId,
+      data
     );
   }
 
-  @Get("/:queueName")
-  async getJobCounts(@Param("queueName") queueName: string) {
+  @Post("/count")
+  async getJobCounts(@Body() input: QueueActionInput) {
+    const { connectionStr, queueName } = input;
     console.debug(`getJobCounts: ${queueName}`);
-    return this.queueMonitorService.getJobCounts(queueName);
+    return this.queueMonitorService.getJobCounts(connectionStr, queueName);
   }
 
-  @Post("/:queueName/pause")
-  async pauseQueue(@Param("queueName") queueName: string) {
-    console.debug(`pauseQueue: ${queueName}`);
-    return this.queueMonitorService.pauseQueue(queueName);
+  @Post("/pause")
+  async pauseQueue(@Body() input: QueueActionInput) {
+    console.debug(`pauseQueue: ${input.queueName}`);
+    const { connectionStr, queueName } = input;
+    return this.queueMonitorService.pauseQueue(connectionStr, queueName);
   }
 
-  @Post("/:queueName/resume")
-  async resumeQueue(@Param("queueName") queueName: string) {
-    console.debug(`resumeQueue: ${queueName}`);
-    return this.queueMonitorService.resumeQueue(queueName);
+  @Post("/resume")
+  async resumeQueue(@Body() input: QueueActionInput) {
+    console.debug(`resumeQueue: ${input.queueName}`);
+    const { connectionStr, queueName } = input;
+    return this.queueMonitorService.resumeQueue(connectionStr, queueName);
   }
 
-  @Post("/:queueName/:jobId/retry")
-  async retryJob(
-    @Param("queueName") queueName: string,
-    @Param("jobId") jobId: string
-  ) {
-    return this.queueMonitorService.retryJob(queueName, jobId);
+  @Post("/retry")
+  async retryJob(@Body() input: JobActionInput) {
+    const { connectionStr, jobId, queueName } = input;
+    return this.queueMonitorService.retryJob(connectionStr, queueName, jobId);
   }
 
-  @Delete("/:queueName/:jobId")
+  @Delete("/:connectionStr/:queueName/:jobId")
   async removeJob(
+    @Param("connectionStr") connectionStr: string,
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string
   ) {
-    return this.queueMonitorService.removeJob(queueName, jobId);
+    return this.queueMonitorService.removeJob(connectionStr, queueName, jobId);
   }
 
-  @Get("/:queueName/:jobId")
-  async getJobDetail(
-    @Param("queueName") queueName: string,
-    @Param("jobId") jobId: string
-  ) {
+  @Post("/detail")
+  async getJobDetail(@Body() input: JobActionInput) {
+    const { connectionStr, jobId, queueName } = input;
+
     console.debug(`getJobDetail: ${queueName} ${jobId}`);
-    return this.queueMonitorService.getJobDetail(queueName, jobId);
+    return this.queueMonitorService.getJobDetail(
+      connectionStr,
+      queueName,
+      jobId
+    );
+  }
+
+  @Get("/:connectionStr")
+  async getAllQueuesOfConnection(
+    @Param("connectionStr") connectionStr: string
+  ) {
+    console.debug("getAllQueuesInfo");
+    return this.queueMonitorService.getQueuesOfConnection(connectionStr);
   }
 }

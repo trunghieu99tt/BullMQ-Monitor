@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 
-export class UpdateJobInput {
+export class JobActionInput {
   @IsString()
   connectionStr: string;
 
@@ -9,6 +9,4 @@ export class UpdateJobInput {
 
   @IsString()
   jobId: string;
-
-  data: any;
 }

@@ -8,6 +8,7 @@ export class Redis {
   }
 
   convertRawData(rawRedisInfo: RedisInfo): IRedisInfo {
+    console.log("rawRedisInfo", rawRedisInfo);
     return {
       usedMemory: rawRedisInfo.used_memory_human,
       peakUsedMemory: rawRedisInfo.used_memory_peak_human,

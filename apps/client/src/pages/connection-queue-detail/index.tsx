@@ -2,7 +2,7 @@ import { JOB_TYPES } from "../../constants";
 import { useQueueDetail } from "./useQueueDetail";
 
 import classes from "./queue-detail.module.css";
-import { Button, Modal, Table } from "antd";
+import { Button, Modal, Space, Table } from "antd";
 import { IJob } from "../../types/model.type";
 import JSONEditor from "../../components/JsonEditor";
 
@@ -80,7 +80,7 @@ const QueueDetail = () => {
       dataIndex: "actions",
       render: (_: any, record: IJob) => {
         return (
-          <div className={classes.jobActions}>
+          <Space className={classes.jobActions}>
             <Button
               type="primary"
               shape="round"
@@ -103,7 +103,7 @@ const QueueDetail = () => {
             >
               Delete
             </Button>
-          </div>
+          </Space>
         );
       },
     },
@@ -125,9 +125,9 @@ const QueueDetail = () => {
           onChange={onChangeJobData}
         />
       </Modal>
-      <header>
+      <header className={classes.header}>
         <h1>Queue {queueName}</h1>
-        <div>
+        <Space>
           {JOB_TYPES.map((type: string, idx: number) => {
             return (
               <Button
@@ -141,13 +141,12 @@ const QueueDetail = () => {
               </Button>
             );
           })}
-        </div>
+        </Space>
       </header>
       <main>
         <Table
           columns={columns}
           dataSource={data}
-          key={currentPage}
           pagination={{
             pageSize: currentPageSize,
             current: currentPage,

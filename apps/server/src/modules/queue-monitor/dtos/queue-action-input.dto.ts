@@ -1,14 +1,9 @@
 import { IsString } from "class-validator";
 
-export class UpdateJobInput {
+export class QueueActionInput {
   @IsString()
   connectionStr: string;
 
   @IsString()
   queueName: string;
-
-  @IsString()
-  jobId: string;
-
-  data: any;
 }

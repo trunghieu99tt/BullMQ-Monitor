@@ -6,12 +6,15 @@ import { BrowserRouter } from "react-router-dom";
 import ErrorBoundary from "./ErrorBoundary";
 import "antd/dist/antd.css";
 import "./index.css";
+import { RecoilRoot } from "recoil";
 
 ReactDOM.render(
   <React.StrictMode>
     <ErrorBoundary>
       <BrowserRouter>
-        <App />
+        <RecoilRoot>
+          <App />
+        </RecoilRoot>
       </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>,
