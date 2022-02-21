@@ -1,0 +1,1 @@
+{"version":3,"file":"lru-cache.d.ts","sourceRoot":"","sources":["../src/lru-cache.ts"],"names":[],"mappings":"AAAA,qBAAa,QAAQ,CAAC,CAAC;IACrB,OAAO,CAAC,MAAM,CAAwC;IACtD,OAAO,CAAC,UAAU,CAAc;IAEzB,GAAG,CAAC,GAAG,EAAE,MAAM,GAAG,CAAC,GAAG,SAAS;IAY/B,GAAG,CAAC,GAAG,EAAE,MAAM,EAAE,KAAK,EAAE,CAAC;CAQjC"}

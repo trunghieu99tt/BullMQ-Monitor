@@ -1,6 +1,8 @@
-import { JobType } from "bullmq";
 import {
+  Body,
+  BodyParam,
   Controller,
+  Delete,
   Get,
   JsonController,
   Param,
@@ -9,6 +11,7 @@ import {
 } from "routing-controllers";
 import Container, { Service } from "typedi";
 import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
+import { UpdateJobInput } from "./dtos/update-job-input.dto";
 import { QueueMonitorService } from "./queue-monito.service";
 
 @Controller("queue-monitor")
@@ -21,6 +24,7 @@ export class QueueMonitorController {
 
   @Get()
   async getAllQueuesInfo() {
+    console.debug("getAllQueuesInfo");
     return this.queueMonitorService.getQueues();
   }
 
@@ -29,28 +33,40 @@ export class QueueMonitorController {
     return this.queueMonitorService.getRedisInfo();
   }
 
-  @Get("/:queueName/job-list")
-  async getJobList(@QueryParams() queryParams: GetJobListQuery) {
-    return this.queueMonitorService.getJobsByType(
-      queryParams.queueName,
-      queryParams.jobType as JobType,
-      queryParams.page,
-      queryParams.pageSize
+  @Post("/job-list")
+  async getJobList(@Body() getJobListBody: GetJobListQuery) {
+    return this.queueMonitorService.getJobsByTypes(
+      getJobListBody.queueName,
+      getJobListBody.jobTypes,
+      getJobListBody.page,
+      getJobListBody.pageSize
+    );
+  }
+
+  @Post("/update-job")
+  async updateJob(@Body() updateJobBody: UpdateJobInput) {
+    return this.queueMonitorService.updateJob(
+      updateJobBody.queueName,
+      updateJobBody.jobId,
+      updateJobBody.data
     );
   }
 
   @Get("/:queueName")
   async getJobCounts(@Param("queueName") queueName: string) {
+    console.debug(`getJobCounts: ${queueName}`);
     return this.queueMonitorService.getJobCounts(queueName);
   }
 
   @Post("/:queueName/pause")
   async pauseQueue(@Param("queueName") queueName: string) {
+    console.debug(`pauseQueue: ${queueName}`);
     return this.queueMonitorService.pauseQueue(queueName);
   }
 
   @Post("/:queueName/resume")
   async resumeQueue(@Param("queueName") queueName: string) {
+    console.debug(`resumeQueue: ${queueName}`);
     return this.queueMonitorService.resumeQueue(queueName);
   }
 
@@ -62,7 +78,7 @@ export class QueueMonitorController {
     return this.queueMonitorService.retryJob(queueName, jobId);
   }
 
-  @Post("/:queueName/:jobId/remove")
+  @Delete("/:queueName/:jobId")
   async removeJob(
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string
@@ -75,6 +91,7 @@ export class QueueMonitorController {
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string
   ) {
+    console.debug(`getJobDetail: ${queueName} ${jobId}`);
     return this.queueMonitorService.getJobDetail(queueName, jobId);
   }
 }

@@ -18,6 +18,5 @@ export const initializeQueues = () => {
   });
 
   queueMonitorService.setQueues(queues);
-
   return queues;
 };

@@ -1,0 +1,20 @@
+{
+  "name": "utils",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@types/lru-cache": "^5.1.1",
+    "@types/node": "^12.0.0",
+    "lru-cache": "^7.3.1",
+    "tsconfig": "*",
+    "typescript": "^3.5.3"
+  }
+}
