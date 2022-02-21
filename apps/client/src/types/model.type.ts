@@ -21,3 +21,11 @@ export interface IJob {
   attempt: number;
   data: any;
 }
+
+export interface IConnection {
+  id: string;
+  name: string;
+  host: string;
+  port: number;
+  info: IRedisInfo;
+}

@@ -4,9 +4,15 @@ import { Redis } from "../models/redis";
 import { LIST_META } from "../types/common.types";
 import { IJob, IRedisInfo } from "../types/model.type";
 
-export const useQueue = () => {
+const BASE_BULL_MONITOR_URL = "/queue-monitor";
+
+type Props = {
+  connectionStr: string;
+};
+
+export const useQueue = ({ connectionStr }: Props) => {
   const getQueues = async () => {
-    const response = await client.get("");
+    const response = await client.get(`${BASE_BULL_MONITOR_URL}`);
     return response?.data;
   };
 
@@ -19,7 +25,7 @@ export const useQueue = () => {
     data: IJob[];
     meta: LIST_META;
   }> => {
-    const response = await client.post(`job-list`, {
+    const response = await client.post(`${BASE_BULL_MONITOR_URL}/job-list`, {
       queueName: queue,
       jobTypes: types.join(","),
       page,
@@ -46,7 +52,9 @@ export const useQueue = () => {
     queueName: string,
     jobId: string
   ): Promise<boolean> => {
-    const response = await client.delete(`/${queueName}/${jobId}`);
+    const response = await client.delete(
+      `${BASE_BULL_MONITOR_URL}/${connectionStr}/${queueName}/${jobId}`
+    );
     return response?.status === 200;
   };
 
@@ -55,7 +63,8 @@ export const useQueue = () => {
     jobId: string,
     data: any
   ): Promise<IJob> => {
-    const response = await client.post("/update-job", {
+    const response = await client.post(`${BASE_BULL_MONITOR_URL}/update-job`, {
+      connectionStr,
       queueName,
       jobId,
       data,

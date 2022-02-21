@@ -6,8 +6,12 @@ import QueueList from "./pages/queue-list";
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<QueueList />} />
-      <Route path="/:queueName" element={<QueueDetail />} />
+      <Route path="/" element={<div>Hello</div>} />
+      <Route
+        path="/connection/:connectionId/:queueName"
+        element={<QueueDetail />}
+      />
+      <Route path="/connection/:connectionId" element={<QueueList />} />
     </Routes>
   );
 };

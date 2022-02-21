@@ -1,0 +1,19 @@
+.header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+
+.connectionList {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+
+.connectionItem {
+}
+
+.connectionItem.active {
+  background-color: aliceblue;
+  border-right: 1px solid #ccc;
+}
