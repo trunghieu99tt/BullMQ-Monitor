@@ -3,6 +3,7 @@ import { useRecoilState } from "recoil";
 import { connectionListState } from "../../states/connection.state";
 import { useConnection } from "../../talons/useConnection";
 import { v4 as uuid } from "uuid";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 type Props = {
   onCancel: () => void;
@@ -11,6 +12,10 @@ type Props = {
 export const useAddConnectionForm = ({ onCancel }: Props) => {
   const { checkConnection, getRedisInfo } = useConnection();
   const [connections, setConnections] = useRecoilState(connectionListState);
+  const [persistConnection, setPersistConnection] = useLocalStorage<string>(
+    "persistConnection",
+    ""
+  );
 
   const onAddConnection = async (values: any) => {
     console.log("values", values);
@@ -42,7 +47,7 @@ export const useAddConnectionForm = ({ onCancel }: Props) => {
           values.password
         );
         console.log("redisInfo", redisInfo);
-        setConnections([
+        const newConnection = [
           ...connections,
           {
             id: uuid(),
@@ -51,7 +56,9 @@ export const useAddConnectionForm = ({ onCancel }: Props) => {
             port: parseInt(values.port, 10),
             info: redisInfo,
           },
-        ]);
+        ];
+        setConnections(newConnection);
+        setPersistConnection(JSON.stringify(newConnection));
       }
       onCancel();
     } else {

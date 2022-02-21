@@ -91,9 +91,16 @@ export class QueueMonitorService {
   async getQueuesOfConnection(
     connectionStr: string
   ): Promise<GetQueuesOutputDto[]> {
-    const queues = this.connectionQueue[connectionStr];
+    let queues = this.connectionQueue[connectionStr];
+
     if (!queues) {
-      throw new NotFoundError(`Queue of ${connectionStr} not found`);
+      const [host, port] = connectionStr.split(":");
+      await this.getQueueListInConnection({
+        host,
+        port: parseInt(port),
+      });
+
+      queues = this.connectionQueue[connectionStr];
     }
 
     return Promise.all(
@@ -153,19 +160,15 @@ export class QueueMonitorService {
             .split(",")
             .map((type: string) => type.trim()) as JobStatus[];
         }
-        console.log("jobTypes", jobTypes);
         const numberOfJobs = await queue.getJobCountByTypes(...jobTypes);
         const totalPages = Math.ceil(numberOfJobs / pageSize);
         if (page > totalPages) {
           page = totalPages;
         }
         const start = (page - 1) * pageSize;
-        const end = Math.min(start + pageSize, numberOfJobs);
+        const end = Math.min(start + pageSize - 1, numberOfJobs);
 
-        console.log("queue", queue.name);
         const jobs = await queue.getJobs(jobTypes, start, end);
-        console.log("jobs", jobs);
-
         const data = jobs.map((job: Job) => {
           const data = job.data;
           return plainToClass(GetJobListOutput, {

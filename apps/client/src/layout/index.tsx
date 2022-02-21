@@ -13,7 +13,7 @@ const withLayout =
       <React.Fragment>
         <Layout
           style={{
-            height: "100vh",
+            minHeight: "100vh",
           }}
         >
           <Header />

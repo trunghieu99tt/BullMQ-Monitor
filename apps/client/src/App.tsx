@@ -1,9 +1,12 @@
 import { Routes, Route } from "react-router";
 import withLayout from "./layout";
-import QueueDetail from "./pages/queue-detail";
-import QueueList from "./pages/queue-list";
+import QueueDetail from "./pages/connection-queue-detail";
+import QueueList from "./pages/connection-queue-list";
+import { useApp } from "./talons/useApp";
 
 const App = () => {
+  const appTalons = useApp();
+
   return (
     <Routes>
       <Route path="/" element={<div>Hello</div>} />

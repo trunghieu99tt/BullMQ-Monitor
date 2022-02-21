@@ -12,7 +12,9 @@ type Props = {
 
 export const useQueue = ({ connectionStr }: Props) => {
   const getQueues = async () => {
-    const response = await client.get(`${BASE_BULL_MONITOR_URL}`);
+    const response = await client.get(
+      `${BASE_BULL_MONITOR_URL}/${connectionStr}`
+    );
     return response?.data;
   };
 
@@ -26,6 +28,7 @@ export const useQueue = ({ connectionStr }: Props) => {
     meta: LIST_META;
   }> => {
     const response = await client.post(`${BASE_BULL_MONITOR_URL}/job-list`, {
+      connectionStr,
       queueName: queue,
       jobTypes: types.join(","),
       page,

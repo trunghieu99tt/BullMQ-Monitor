@@ -43,6 +43,7 @@ const Sidebar = () => {
         <AddConnectionForm onCancel={handleCloseAddConnectionForm} />
       </Modal>
       <Sider
+        width={"20%"}
         style={{
           background: "#fff",
         }}

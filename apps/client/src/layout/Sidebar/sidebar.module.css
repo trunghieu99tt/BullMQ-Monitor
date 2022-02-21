@@ -11,9 +11,11 @@
 }
 
 .connectionItem {
+  background: #1890ff;
+  padding: 0.5rem;
+  border-radius: 0.2rem;
 }
 
-.connectionItem.active {
-  background-color: aliceblue;
-  border-right: 1px solid #ccc;
+.connectionItem a {
+  color: #fff;
 }

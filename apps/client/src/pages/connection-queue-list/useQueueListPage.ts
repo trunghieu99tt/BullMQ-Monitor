@@ -7,6 +7,7 @@ import { useQueue } from "../../talons/useQueue";
 
 export const useQueueListPage = () => {
   const { connectionId } = useParams();
+
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
@@ -19,7 +20,7 @@ export const useQueueListPage = () => {
 
   useEffect(() => {
     fetchQueues();
-  }, []);
+  }, [connection]);
 
   useEffect(() => {
     if (connection?.info) {
@@ -33,6 +34,7 @@ export const useQueueListPage = () => {
   };
 
   return {
+    connectionId,
     queues,
     redis,
   };
