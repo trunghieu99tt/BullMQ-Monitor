@@ -1,5 +1,5 @@
 {
-  "name": "turborepo-basic-shared",
+  "name": "bull-monitor",
   "version": "0.0.0",
   "private": true,
   "workspaces": [
@@ -10,9 +10,12 @@
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\" --write \"**/*.{js,jsx}\"",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
   },
   "devDependencies": {
+    "husky": "^7.0.4",
     "prettier": "^2.5.1",
     "turbo": "latest"
   },
@@ -20,5 +23,12 @@
     "npm": ">=7.0.0",
     "node": ">=14.0.0"
   },
-  "packageManager": "yarn@1.22.17"
+  "packageManager": "yarn@1.22.17",
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix ",
+      "prettier --write",
+      "git add ."
+    ]
+  }
 }
