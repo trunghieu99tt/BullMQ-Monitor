@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router";
 import withLayout from "./layout";
 import QueueDetail from "./pages/connection-queue-detail";
 import QueueList from "./pages/connection-queue-list";
+import Home from "./pages/home";
 import { useApp } from "./talons/useApp";
 
 const App = () => {
@@ -9,7 +10,7 @@ const App = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<div>Hello</div>} />
+      <Route path="/" element={<Home />} />
       <Route
         path="/connection/:connectionId/:queueName"
         element={<QueueDetail />}

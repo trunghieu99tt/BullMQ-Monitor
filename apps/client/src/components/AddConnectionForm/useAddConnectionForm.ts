@@ -46,7 +46,6 @@ export const useAddConnectionForm = ({ onCancel }: Props) => {
           values.username,
           values.password
         );
-        console.log("redisInfo", redisInfo);
         const newConnection = [
           ...connections,
           {
