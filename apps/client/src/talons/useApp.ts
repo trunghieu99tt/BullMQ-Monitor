@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
+import client from "../api/client";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { connectionListState } from "../states/connection.state";
+import { IConnection } from "../types/model.type";
 
 export const useApp = () => {
   const [persistConnection, _] = useLocalStorage<string>(
@@ -12,12 +14,22 @@ export const useApp = () => {
 
   useEffect(() => {
     if (persistConnection) {
-      console.log("persistConnection", persistConnection);
-      const connections = JSON.parse(persistConnection);
-      console.log("connections", connections);
-      setConnections(connections);
+      initData();
     }
   }, [persistConnection]);
+
+  const initData = async () => {
+    const connections = JSON.parse(persistConnection);
+    setConnections(connections);
+    await Promise.all(
+      connections.map(async (connection: IConnection) => {
+        await client.post("/queue-monitor/init-info", {
+          host: connection.host,
+          port: connection.port,
+        });
+      })
+    );
+  };
 
   return {
     persistConnection,

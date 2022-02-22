@@ -8,13 +8,15 @@ import { IJob } from "../../types/model.type";
 
 export const useQueueDetail = () => {
   const { queueName, connectionId } = useParams();
+  const params = useParams();
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
   const setRedis = useSetRecoilState(redisState);
+  const connectionStr = `${connection?.host}:${connection?.port}`;
 
   const { getQueueJobs, deleteJob, updateJob } = useQueue({
-    connectionStr: `${connection?.host}:${connection?.port}`,
+    connectionStr,
   });
 
   const [data, setData] = useState<any[]>([]);
@@ -34,8 +36,10 @@ export const useQueueDetail = () => {
   const [updatedJobData, setUpdatedJobData] = useState<any>({});
 
   useEffect(() => {
-    fetchQueueJob(queueName);
-  }, [queueName]);
+    if (connection) {
+      fetchQueueJob(queueName);
+    }
+  }, [queueName, connectionId, connection]);
 
   useEffect(() => {
     if (connection?.info) {
@@ -61,7 +65,7 @@ export const useQueueDetail = () => {
         }
       }
     },
-    []
+    [connectionStr, currentPage, currentPageSize, types]
   );
 
   const toggleActiveJobData = (id: string) => {
