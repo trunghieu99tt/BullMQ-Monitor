@@ -1,11 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { POLLING_INTERVAL } from "../../constants";
-import { connectionSelectorByConnectionId } from "../../states/connection.state";
-import { redisState } from "../../states/redis.state";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+// talons
 import { useQueue } from "../../talons/useQueue";
+
+// states
+import { redisState } from "../../states/redis.state";
+import { connectionSelectorByConnectionId } from "../../states/connection.state";
+
+// models
 import { IJob } from "../../types/model.type";
+import { LIST_META } from "../../types/common.types";
+
+// constants
+import { POLLING_INTERVAL } from "../../constants";
 
 export const useQueueDetail = () => {
   const { queueName, connectionId } = useParams();
@@ -13,6 +22,7 @@ export const useQueueDetail = () => {
     connectionSelectorByConnectionId(connectionId)
   );
   const setRedis = useSetRecoilState(redisState);
+
   let fetchQueueJobIntervalRef = useRef<any>();
   const connectionStr = `${connection?.host}:${connection?.port}`;
 
@@ -21,20 +31,17 @@ export const useQueueDetail = () => {
   });
 
   const [data, setData] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(20);
   const [types, setTypes] = useState<string[]>(["*"]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [updatedJobData, setUpdatedJobData] = useState<any>({});
+  const [editingJob, setEditingJob] = useState<IJob | null>(null);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(20);
   const [activeIds, setActiveIds] = useState<string[]>([]);
-  const [meta, setMeta] = useState<{
-    total: number;
-    page: number;
-  }>({
+  const [meta, setMeta] = useState<LIST_META>({
     total: 0,
     page: 1,
   });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [editingJob, setEditingJob] = useState<IJob | null>(null);
-  const [updatedJobData, setUpdatedJobData] = useState<any>({});
 
   useEffect(() => {
     if (connection) {
@@ -107,7 +114,7 @@ export const useQueueDetail = () => {
   };
 
   const toggleType = useCallback(
-    (type: string, shouldIgnoreAll = false) => {
+    (type: string) => {
       let newTypes = [...types];
       if (types.includes(type)) {
         newTypes = newTypes.filter((item) => item !== type);
@@ -159,8 +166,8 @@ export const useQueueDetail = () => {
     queueName,
     editingJob,
     currentPage,
-    currentPageSize,
     updatedJobData,
+    currentPageSize,
 
     setTypes,
     removeJob,

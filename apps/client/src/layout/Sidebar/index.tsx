@@ -1,12 +1,21 @@
-import { PlusOutlined } from "@ant-design/icons";
-import { Layout, Button, Modal } from "antd";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+import { Link } from "react-router-dom";
+import { Layout, Button, Modal } from "antd";
+
+// components
 import AddConnectionForm from "../../components/AddConnectionForm";
+
+// states
 import { connectionListState } from "../../states/connection.state";
+
+// icons
+import { PlusOutlined } from "@ant-design/icons";
+
+// types
 import { IConnection } from "../../types/model.type";
 
+// styles
 import classes from "./sidebar.module.css";
 
 const { Sider } = Layout;

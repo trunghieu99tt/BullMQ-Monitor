@@ -1,6 +1,10 @@
 import client from "../api/client";
+
+// models
 import { Job } from "../models/job";
 import { Redis } from "../models/redis";
+
+// types
 import { LIST_META } from "../types/common.types";
 import { IJob, IRedisInfo } from "../types/model.type";
 
@@ -27,6 +31,8 @@ export const useQueue = ({ connectionStr }: Props) => {
     data: IJob[];
     meta: LIST_META;
   }> => {
+    console.log("client", client.defaults.baseURL);
+
     const response = await client.post(`${BASE_BULL_MONITOR_URL}/job-list`, {
       connectionStr,
       queueName: queue,
