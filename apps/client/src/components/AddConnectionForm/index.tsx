@@ -50,7 +50,7 @@ const AddConnectionForm = ({ onCancel }: Props) => {
           },
         ]}
       >
-        <Input />
+        <Input type={"number"} />
       </Form.Item>
 
       <Form.Item label="Username" name="username">

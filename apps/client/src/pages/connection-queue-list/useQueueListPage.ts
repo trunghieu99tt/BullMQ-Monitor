@@ -1,11 +1,17 @@
 import { message } from "antd";
-import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { POLLING_INTERVAL } from "../../constants";
-import { connectionSelectorByConnectionId } from "../../states/connection.state";
-import { redisState } from "../../states/redis.state";
+
+// talons
 import { useQueue } from "../../talons/useQueue";
+
+// states
+import { redisState } from "../../states/redis.state";
+import { connectionSelectorByConnectionId } from "../../states/connection.state";
+
+// constants
+import { POLLING_INTERVAL } from "../../constants";
 
 export const useQueueListPage = () => {
   const { connectionId } = useParams();
@@ -13,10 +19,12 @@ export const useQueueListPage = () => {
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
+  const [redis, setRedis] = useRecoilState(redisState);
+
   const { getQueues } = useQueue({
     connectionStr: `${connection?.host}:${connection?.port}`,
   });
-  const [redis, setRedis] = useRecoilState(redisState);
+
   const fetchQueueListIntervalRef = useRef<any>();
 
   const [queues, setQueues] = useState([]);

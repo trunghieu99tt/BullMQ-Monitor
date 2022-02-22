@@ -1,9 +1,14 @@
 import { useMemo } from "react";
 import { Button, Table } from "antd";
 import { Link } from "react-router-dom";
-import { IJob } from "../../types/model.type";
+
+// talons
 import { useQueueListPage } from "./useQueueListPage";
 
+// types
+import { IJob } from "../../types/model.type";
+
+// styles
 import classes from "./queue-list.module.css";
 
 const QueueList = () => {
