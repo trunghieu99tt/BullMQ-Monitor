@@ -54,30 +54,41 @@ const QueueDetail = () => {
     {
       title: "ID",
       dataIndex: "id",
+      width: "100px",
     },
     {
       title: "Status",
       dataIndex: "status",
+      width: "100px",
     },
     {
       title: "Name",
       dataIndex: "name",
+      width: "100px",
     },
     {
       title: "Timestamp",
       dataIndex: "timestamp",
+      width: "200px",
+      render: (timestamp: number) => {
+        return <span>{new Date(timestamp).toLocaleString()}</span>;
+      },
     },
     {
       title: "Delay",
       dataIndex: "delay",
+      width: "100px",
     },
     {
       title: "Attempts",
       dataIndex: "attempt",
+      width: "100px",
     },
     {
       title: "Actions",
       dataIndex: "actions",
+      fixed: "right" as "right",
+      width: "300px",
       render: (_: any, record: IJob) => {
         return (
           <Space className={classes.jobActions}>
@@ -152,6 +163,10 @@ const QueueDetail = () => {
             current: currentPage,
             total: meta.total,
             onChange: onChangePagination,
+          }}
+          scroll={{
+            x: 500,
+            y: 600,
           }}
         />
       </main>

@@ -60,10 +60,14 @@ export class QueueMonitorService {
     if (queues) {
       this.connectionQueue[`${input.host}:${input.port}`] = queues;
     }
+
+    return true;
   }
 
   getQueue(connectionStr: string, queueName: string): Queue {
     const queues = this.connectionQueue[connectionStr];
+    console.log("queues", queues);
+
     if (!queues) {
       throw new NotFoundError(`Queue of ${connectionStr} not found`);
     }

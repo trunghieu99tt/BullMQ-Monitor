@@ -5,7 +5,7 @@ import classes from "./header.module.css";
 import { useHeader } from "./useHeader";
 
 const Header = () => {
-  const { redis, toggleShowRedisInfo } = useHeader();
+  const { redis } = useHeader();
 
   console.log("redis", redis);
 
@@ -22,6 +22,7 @@ const Header = () => {
             ))}
           </section>
         ),
+        maskClosable: true,
       });
     }
   }, [redis]);

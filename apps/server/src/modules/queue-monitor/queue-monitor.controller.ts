@@ -8,6 +8,7 @@ import {
   Post,
 } from "routing-controllers";
 import Container, { Service } from "typedi";
+import { CheckConnectionInput } from "../redis/dtos/check-connection-input.dto";
 import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
 import { JobActionInput } from "./dtos/job-action-input.dto";
 import { QueueActionInput } from "./dtos/queue-action-input.dto";
@@ -20,6 +21,13 @@ import { QueueMonitorService } from "./queue-monitor.service";
 export class QueueMonitorController {
   constructor(private readonly queueMonitorService: QueueMonitorService) {
     this.queueMonitorService = Container.get(QueueMonitorService);
+  }
+
+  @Post("/init-info")
+  async initConnectionQueues(
+    @Body() input: CheckConnectionInput
+  ): Promise<boolean> {
+    return this.queueMonitorService.getQueueListInConnection(input);
   }
 
   @Get("/redis")

@@ -1,20 +1,17 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Layout, Button, Modal } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import AddConnectionForm from "../../components/AddConnectionForm";
 import { connectionListState } from "../../states/connection.state";
 import { IConnection } from "../../types/model.type";
-import { getParams } from "../../utils/url";
 
 import classes from "./sidebar.module.css";
 
 const { Sider } = Layout;
 
 const Sidebar = () => {
-  const { pathname } = window.location;
-
   const [showAddConnectionForm, setShowAddConnectionForm] =
     useState<boolean>(false);
   const connections = useRecoilValue(connectionListState);
@@ -27,11 +24,6 @@ const Sidebar = () => {
     setShowAddConnectionForm(false);
   };
 
-  useEffect(() => {
-    const params = getParams(pathname);
-    console.log("params", params);
-  }, [pathname]);
-
   return (
     <React.Fragment>
       <Modal
@@ -39,6 +31,7 @@ const Sidebar = () => {
         footer={false}
         maskClosable={true}
         closeIcon={false}
+        onCancel={handleCloseAddConnectionForm}
       >
         <AddConnectionForm onCancel={handleCloseAddConnectionForm} />
       </Modal>
