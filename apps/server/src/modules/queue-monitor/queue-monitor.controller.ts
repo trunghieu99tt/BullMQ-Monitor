@@ -8,12 +8,14 @@ import {
   Post,
 } from "routing-controllers";
 import Container, { Service } from "typedi";
-import { CheckConnectionInput } from "../redis/dtos/check-connection-input.dto";
-import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
+
+// dtos
 import { JobActionInput } from "./dtos/job-action-input.dto";
-import { QueueActionInput } from "./dtos/queue-action-input.dto";
 import { UpdateJobInput } from "./dtos/update-job-input.dto";
 import { QueueMonitorService } from "./queue-monitor.service";
+import { QueueActionInput } from "./dtos/queue-action-input.dto";
+import { GetJobListQuery } from "./dtos/get-job-list-query-params.dto";
+import { CheckConnectionInput } from "../redis/dtos/check-connection-input.dto";
 
 @Controller("queue-monitor")
 @JsonController("/queue-monitor")
@@ -27,29 +29,39 @@ export class QueueMonitorController {
   async initConnectionQueues(
     @Body() input: CheckConnectionInput
   ): Promise<boolean> {
+    console.debug(
+      `${this.initConnectionQueues} was called`,
+      JSON.stringify(input, null, 2)
+    );
     return this.queueMonitorService.getQueueListInConnection(input);
   }
 
-  @Get("/redis")
-  async getRedisInfo() {
-    return this.queueMonitorService.getRedisInfo();
-  }
-
   @Post("/job-list")
-  async getJobList(@Body() getJobListBody: GetJobListQuery) {
+  async getJobList(@Body() getJobListInput: GetJobListQuery) {
+    console.debug(
+      `${this.getJobList} was called`,
+      JSON.stringify(getJobListInput, null, 2)
+    );
+
+    const { connectionStr, jobTypes, page, pageSize, queueName } =
+      getJobListInput;
     return this.queueMonitorService.getJobsByTypes(
-      getJobListBody.connectionStr,
-      getJobListBody.queueName,
-      getJobListBody.jobTypes,
-      getJobListBody.page,
-      getJobListBody.pageSize
+      connectionStr,
+      queueName,
+      jobTypes,
+      page,
+      pageSize
     );
   }
 
   @Post("/update-job")
   async updateJob(@Body() updateJobBody: UpdateJobInput) {
-    const { connectionStr, data, jobId, queueName } = updateJobBody;
+    console.debug(
+      `${this.updateJob} was called`,
+      JSON.stringify(updateJobBody, null, 2)
+    );
 
+    const { connectionStr, data, jobId, queueName } = updateJobBody;
     return this.queueMonitorService.updateJob(
       connectionStr,
       queueName,
@@ -60,27 +72,44 @@ export class QueueMonitorController {
 
   @Post("/count")
   async getJobCounts(@Body() input: QueueActionInput) {
+    console.debug(
+      `${this.getJobCounts} was called`,
+      JSON.stringify(input, null, 2)
+    );
+
     const { connectionStr, queueName } = input;
-    console.debug(`getJobCounts: ${queueName}`);
     return this.queueMonitorService.getJobCounts(connectionStr, queueName);
   }
 
   @Post("/pause")
   async pauseQueue(@Body() input: QueueActionInput) {
-    console.debug(`pauseQueue: ${input.queueName}`);
+    console.debug(
+      `${this.pauseQueue} was called`,
+      JSON.stringify(input, null, 2)
+    );
+
     const { connectionStr, queueName } = input;
     return this.queueMonitorService.pauseQueue(connectionStr, queueName);
   }
 
   @Post("/resume")
   async resumeQueue(@Body() input: QueueActionInput) {
-    console.debug(`resumeQueue: ${input.queueName}`);
+    console.debug(
+      `${this.resumeQueue} was called`,
+      JSON.stringify(input, null, 2)
+    );
+
     const { connectionStr, queueName } = input;
     return this.queueMonitorService.resumeQueue(connectionStr, queueName);
   }
 
   @Post("/retry")
   async retryJob(@Body() input: JobActionInput) {
+    console.debug(
+      `${this.retryJob} was called`,
+      JSON.stringify(input, null, 2)
+    );
+
     const { connectionStr, jobId, queueName } = input;
     return this.queueMonitorService.retryJob(connectionStr, queueName, jobId);
   }
@@ -91,14 +120,30 @@ export class QueueMonitorController {
     @Param("queueName") queueName: string,
     @Param("jobId") jobId: string
   ) {
+    console.debug(
+      `${this.removeJob} was called`,
+      JSON.stringify(
+        {
+          connectionStr,
+          queueName,
+          jobId,
+        },
+        null,
+        2
+      )
+    );
+
     return this.queueMonitorService.removeJob(connectionStr, queueName, jobId);
   }
 
   @Post("/detail")
   async getJobDetail(@Body() input: JobActionInput) {
-    const { connectionStr, jobId, queueName } = input;
+    console.debug(
+      `${this.getJobDetail} was called`,
+      JSON.stringify(input, null, 2)
+    );
 
-    console.debug(`getJobDetail: ${queueName} ${jobId}`);
+    const { connectionStr, jobId, queueName } = input;
     return this.queueMonitorService.getJobDetail(
       connectionStr,
       queueName,
@@ -110,7 +155,7 @@ export class QueueMonitorController {
   async getAllQueuesOfConnection(
     @Param("connectionStr") connectionStr: string
   ) {
-    console.debug("getAllQueuesInfo");
+    console.debug(`${this.getAllQueuesOfConnection} was called`, connectionStr);
     return this.queueMonitorService.getQueuesOfConnection(connectionStr);
   }
 }

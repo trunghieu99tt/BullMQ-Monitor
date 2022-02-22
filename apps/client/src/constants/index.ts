@@ -6,3 +6,5 @@ export const JOB_TYPES = [
   "completed",
   "paused",
 ];
+
+export const POLLING_INTERVAL = 10 * 1000; // 10 seconds

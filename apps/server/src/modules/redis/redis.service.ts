@@ -1,14 +1,15 @@
-import { Service } from "typedi";
-import { CheckConnectionInput } from "./dtos/check-connection-input.dto";
 import Redis from "ioredis";
-import { BadRequestError } from "routing-controllers";
+import { Service } from "typedi";
 import redisInfo from "redis-info";
+
+// dtos
+import { CheckConnectionInput } from "./dtos/check-connection-input.dto";
+
+// constants
 import { TEN_SECONDS } from "../../common/constants";
 
 @Service()
 export class RedisService {
-  constructor() {}
-
   createClient(input: CheckConnectionInput): Redis.Redis {
     return new Redis({
       host: input.host,

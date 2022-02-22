@@ -7,8 +7,6 @@ import { useHeader } from "./useHeader";
 const Header = () => {
   const { redis } = useHeader();
 
-  console.log("redis", redis);
-
   const showRedisInfo = useCallback(() => {
     if (redis) {
       Modal.info({
@@ -31,11 +29,13 @@ const Header = () => {
     <React.Fragment>
       <PageHeader
         title={<Link to="/">Bull Monitor</Link>}
-        extra={[
-          <Button shape="round" type="primary" onClick={showRedisInfo}>
-            Redis info
-          </Button>,
-        ]}
+        extra={
+          redis && [
+            <Button shape="round" type="primary" onClick={showRedisInfo}>
+              Redis info
+            </Button>,
+          ]
+        }
       ></PageHeader>
     </React.Fragment>
   );

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { POLLING_INTERVAL } from "../../constants";
 import { connectionSelectorByConnectionId } from "../../states/connection.state";
 import { redisState } from "../../states/redis.state";
 import { useQueue } from "../../talons/useQueue";
@@ -8,11 +9,11 @@ import { IJob } from "../../types/model.type";
 
 export const useQueueDetail = () => {
   const { queueName, connectionId } = useParams();
-  const params = useParams();
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
   const setRedis = useSetRecoilState(redisState);
+  let fetchQueueJobIntervalRef = useRef<any>();
   const connectionStr = `${connection?.host}:${connection?.port}`;
 
   const { getQueueJobs, deleteJob, updateJob } = useQueue({
@@ -38,7 +39,21 @@ export const useQueueDetail = () => {
   useEffect(() => {
     if (connection) {
       fetchQueueJob(queueName);
+
+      if (fetchQueueJobIntervalRef?.current) {
+        clearInterval(fetchQueueJobIntervalRef.current);
+      }
+
+      fetchQueueJobIntervalRef.current = setInterval(() => {
+        fetchQueueJob(queueName);
+      }, POLLING_INTERVAL);
     }
+
+    return () => {
+      if (fetchQueueJobIntervalRef?.current) {
+        clearInterval(fetchQueueJobIntervalRef.current);
+      }
+    };
   }, [queueName, connectionId, connection]);
 
   useEffect(() => {
@@ -50,12 +65,14 @@ export const useQueueDetail = () => {
   const fetchQueueJob = useCallback(
     async (queueName = "", types = ["*"], page = 1, pageSize = 20) => {
       if (queueName) {
+        setLoading(true);
         const { data, meta } = await getQueueJobs(
           queueName,
           types,
           page,
           pageSize
         );
+        setLoading(false);
         setData(data);
         setMeta(meta);
         const totalPages = Math.ceil(meta.total / currentPageSize);
@@ -137,6 +154,7 @@ export const useQueueDetail = () => {
     data,
     meta,
     types,
+    loading,
     activeIds,
     queueName,
     editingJob,

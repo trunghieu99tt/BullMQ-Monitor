@@ -11,6 +11,7 @@ const QueueDetail = () => {
     data,
     meta,
     types,
+    loading,
     queueName,
     editingJob,
     currentPage,
@@ -156,6 +157,7 @@ const QueueDetail = () => {
       </header>
       <main>
         <Table
+          loading={loading}
           columns={columns}
           dataSource={data}
           pagination={{

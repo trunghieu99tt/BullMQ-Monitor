@@ -13,6 +13,7 @@ import { ObjectTool } from "../../common/tools/object.tool";
 import { GetQueuesOutputDto } from "./dtos/get-queues-output.dto";
 import { GetJobListOutput } from "./dtos/get-job-list-output.dto";
 import { CheckConnectionInput } from "../redis/dtos/check-connection-input.dto";
+import { JOB_STATUS } from "../../common/constants";
 
 @Service()
 export class QueueMonitorService {
@@ -20,8 +21,6 @@ export class QueueMonitorService {
   connectionQueue: {
     [key: string]: Queue[];
   } = {};
-
-  constructor() {}
 
   async getQueueListInConnection(input: CheckConnectionInput) {
     const redisClient = new Redis({
@@ -34,7 +33,7 @@ export class QueueMonitorService {
     const queueNameRegExp = new RegExp("(.*):(.*):id");
     const keys = await redisClient.keys("*:*:id");
     const rawQueues = keys.map(function (key) {
-      var match = queueNameRegExp.exec(key);
+      const match = queueNameRegExp.exec(key);
       if (match) {
         return {
           prefix: match[1],
@@ -158,7 +157,7 @@ export class QueueMonitorService {
       if (queue) {
         let jobTypes: JobStatus[] = [];
         if (types === "*") {
-          jobTypes = ["waiting", "active", "completed", "failed", "delayed"];
+          jobTypes = [...JOB_STATUS];
         } else {
           jobTypes = types
             .split(",")
