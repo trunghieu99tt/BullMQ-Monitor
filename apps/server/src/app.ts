@@ -1,7 +1,9 @@
-import { createExpressServer, useContainer } from "routing-controllers";
 import Container from "typedi";
-import { QueueMonitorController } from "./modules/queue-monitor/queue-monitor.controller";
+import { createExpressServer, useContainer } from "routing-controllers";
+
+// controllers
 import { RedisController } from "./modules/redis/redis.controller";
+import { QueueMonitorController } from "./modules/queue-monitor/queue-monitor.controller";
 
 useContainer(Container);
 

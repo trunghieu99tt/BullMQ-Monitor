@@ -1,9 +1,17 @@
-import { useEffect, useState } from "react";
+import { message } from "antd";
 import { useParams } from "react-router";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { connectionSelectorByConnectionId } from "../../states/connection.state";
-import { redisState } from "../../states/redis.state";
+
+// talons
 import { useQueue } from "../../talons/useQueue";
+
+// states
+import { redisState } from "../../states/redis.state";
+import { connectionSelectorByConnectionId } from "../../states/connection.state";
+
+// constants
+import { POLLING_INTERVAL } from "../../constants";
 
 export const useQueueListPage = () => {
   const { connectionId } = useParams();
@@ -11,15 +19,33 @@ export const useQueueListPage = () => {
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
+  const [redis, setRedis] = useRecoilState(redisState);
+
   const { getQueues } = useQueue({
     connectionStr: `${connection?.host}:${connection?.port}`,
   });
-  const [redis, setRedis] = useRecoilState(redisState);
+
+  const fetchQueueListIntervalRef = useRef<any>();
 
   const [queues, setQueues] = useState([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchQueues();
+
+    if (fetchQueueListIntervalRef?.current) {
+      clearInterval(fetchQueueListIntervalRef.current);
+    }
+
+    fetchQueueListIntervalRef.current = setInterval(() => {
+      fetchQueues();
+    }, POLLING_INTERVAL);
+
+    return () => {
+      if (fetchQueueListIntervalRef?.current) {
+        clearInterval(fetchQueueListIntervalRef.current);
+      }
+    };
   }, [connection]);
 
   useEffect(() => {
@@ -29,13 +55,21 @@ export const useQueueListPage = () => {
   }, [connection]);
 
   const fetchQueues = async () => {
-    const data = await getQueues();
-    setQueues(data);
+    try {
+      setLoading(true);
+      const data = await getQueues();
+      setLoading(false);
+      setQueues(data);
+    } catch (error: any) {
+      console.error(`${fetchQueues.name} error:`, error);
+      message.error(error.message);
+    }
   };
 
   return {
-    connectionId,
-    queues,
     redis,
+    queues,
+    loading,
+    connectionId,
   };
 };

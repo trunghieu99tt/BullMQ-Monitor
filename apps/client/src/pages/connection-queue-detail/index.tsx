@@ -1,16 +1,26 @@
-import { JOB_TYPES } from "../../constants";
+import { Button, Modal, Space, Table } from "antd";
+
+// talons
 import { useQueueDetail } from "./useQueueDetail";
 
-import classes from "./queue-detail.module.css";
-import { Button, Modal, Space, Table } from "antd";
-import { IJob } from "../../types/model.type";
+// components
 import JSONEditor from "../../components/JsonEditor";
+
+// constants
+import { JOB_TYPES } from "../../constants";
+
+// types
+import { IJob } from "../../types/model.type";
+
+// styles
+import classes from "./queue-detail.module.css";
 
 const QueueDetail = () => {
   const {
     data,
     meta,
     types,
+    loading,
     queueName,
     editingJob,
     currentPage,
@@ -19,11 +29,11 @@ const QueueDetail = () => {
 
     removeJob,
     toggleType,
-    setEditingJob,
-    onChangePagination,
-    onChangeJobData,
-    updateJobData,
     onCancelEdit,
+    setEditingJob,
+    updateJobData,
+    onChangeJobData,
+    onChangePagination,
   } = useQueueDetail();
 
   const onShowDetail = (jobId: string) => {
@@ -156,6 +166,7 @@ const QueueDetail = () => {
       </header>
       <main>
         <Table
+          loading={loading}
           columns={columns}
           dataSource={data}
           pagination={{
