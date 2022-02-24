@@ -14,7 +14,7 @@ export class Job {
       name: rawData?.name || "",
       timestamp: rawData?.timestamp || 0,
       delay: rawData?.delay || 0,
-      attempt: rawData?.attempt || 0,
+      attempts: rawData?.attempts || 0,
       data: rawData?.data || "",
     };
   }

@@ -18,7 +18,7 @@ export interface IJob {
   name: string;
   timestamp: number;
   delay: number;
-  attempt: number;
+  attempts: number;
   data: any;
 }
 

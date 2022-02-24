@@ -48,6 +48,9 @@ export const connectionSelectorByConnectionId = selectorFamily<
       }
 
       const connections = get(connectionListState);
+
+      console.log("connections", connections);
+
       const connection = connections.find(
         (connection) => connection.id === connectionId
       );
