@@ -12,9 +12,10 @@ const BASE_BULL_MONITOR_URL = "/queue-monitor";
 
 type Props = {
   connectionStr: string;
+  queueName: string;
 };
 
-export const useQueue = ({ connectionStr }: Props) => {
+export const useQueue = ({ connectionStr, queueName }: Props) => {
   const getQueues = async () => {
     const response = await client.get(
       `${BASE_BULL_MONITOR_URL}/${connectionStr}`
@@ -23,7 +24,6 @@ export const useQueue = ({ connectionStr }: Props) => {
   };
 
   const getQueueJobs = async (
-    queue: string,
     types: string[],
     page = 1,
     pageSize = 20
@@ -35,7 +35,7 @@ export const useQueue = ({ connectionStr }: Props) => {
 
     const response = await client.post(`${BASE_BULL_MONITOR_URL}/job-list`, {
       connectionStr,
-      queueName: queue,
+      queueName,
       jobTypes: types.join(","),
       page,
       pageSize,
@@ -57,21 +57,14 @@ export const useQueue = ({ connectionStr }: Props) => {
     return redisInfo.getData();
   };
 
-  const deleteJob = async (
-    queueName: string,
-    jobId: string
-  ): Promise<boolean> => {
+  const deleteJob = async (jobId: string): Promise<boolean> => {
     const response = await client.delete(
       `${BASE_BULL_MONITOR_URL}/${connectionStr}/${queueName}/${jobId}`
     );
     return response?.status === 200;
   };
 
-  const updateJob = async (
-    queueName: string,
-    jobId: string,
-    data: any
-  ): Promise<IJob> => {
+  const updateJob = async (jobId: string, data: any): Promise<IJob> => {
     const response = await client.post(`${BASE_BULL_MONITOR_URL}/update-job`, {
       connectionStr,
       queueName,
@@ -82,10 +75,32 @@ export const useQueue = ({ connectionStr }: Props) => {
     return new Job(response?.data).getData();
   };
 
+  const getJobCounts = async () => {
+    const response = await client.post(`${BASE_BULL_MONITOR_URL}/count`, {
+      connectionStr,
+      queueName,
+    });
+    return response?.data;
+  };
+
+  const retryJob = async (jobId: string) => {
+    const response = await client.post(`${BASE_BULL_MONITOR_URL}/retry`, {
+      connectionStr,
+      queueName,
+      jobId,
+    });
+
+    console.log("response", response);
+
+    return response?.data;
+  };
+
   return {
     getQueues,
     deleteJob,
     updateJob,
+    retryJob,
+    getJobCounts,
     getQueueJobs,
     getRedisDetail,
   };

@@ -172,14 +172,19 @@ export class QueueMonitorService {
         const end = Math.min(start + pageSize - 1, numberOfJobs);
 
         const jobs = await queue.getJobs(jobTypes, start, end);
-        const data = jobs.map((job: Job) => {
-          const data = job.data;
-          return plainToClass(GetJobListOutput, {
-            ...ObjectTool.omit(job, ["queue", "data", "opts"]),
-            data: JSON.stringify(data),
-            ...job.opts,
-          });
-        });
+
+        const data = await Promise.all(
+          jobs.map(async (job: Job) => {
+            console.log("job", job);
+            const data = job.data;
+            return plainToClass(GetJobListOutput, {
+              ...ObjectTool.omit(job, ["queue", "data", "opts"]),
+              data: JSON.stringify(data),
+              ...job.opts,
+              status: await job.getState(),
+            });
+          })
+        );
 
         return {
           data,

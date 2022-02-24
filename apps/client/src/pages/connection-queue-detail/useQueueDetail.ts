@@ -26,15 +26,20 @@ export const useQueueDetail = () => {
   let fetchQueueJobIntervalRef = useRef<any>();
   const connectionStr = `${connection?.host}:${connection?.port}`;
 
-  const { getQueueJobs, deleteJob, updateJob } = useQueue({
-    connectionStr,
-  });
+  const { getQueueJobs, deleteJob, updateJob, getJobCounts, retryJob } =
+    useQueue({
+      connectionStr,
+      queueName: queueName || "",
+    });
 
   const [data, setData] = useState<any[]>([]);
   const [types, setTypes] = useState<string[]>(["*"]);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [updatedJobData, setUpdatedJobData] = useState<any>({});
+  const [jobCounts, setJobCounts] = useState<{
+    [key: string]: number;
+  }>({});
   const [editingJob, setEditingJob] = useState<IJob | null>(null);
   const [currentPageSize, setCurrentPageSize] = useState<number>(20);
   const [activeIds, setActiveIds] = useState<string[]>([]);
@@ -45,15 +50,19 @@ export const useQueueDetail = () => {
 
   useEffect(() => {
     if (connection) {
-      fetchQueueJob(queueName);
+      fetchData();
 
       if (fetchQueueJobIntervalRef?.current) {
         clearInterval(fetchQueueJobIntervalRef.current);
       }
 
       fetchQueueJobIntervalRef.current = setInterval(() => {
-        fetchQueueJob(queueName);
+        fetchData();
       }, POLLING_INTERVAL);
+
+      if (connection?.info) {
+        setRedis(connection?.info);
+      }
     }
 
     return () => {
@@ -61,36 +70,53 @@ export const useQueueDetail = () => {
         clearInterval(fetchQueueJobIntervalRef.current);
       }
     };
-  }, [queueName, connectionId, connection]);
+  }, [
+    queueName,
+    connectionId,
+    connection,
+    currentPage,
+    currentPageSize,
+    types,
+  ]);
 
-  useEffect(() => {
-    if (connection?.info) {
-      setRedis(connection?.info);
+  const fetchData = useCallback(async () => {
+    if (queueName) {
+      setLoading(true);
+      await Promise.all([fetchJobCount(), fetchQueueJob()]);
+      setLoading(false);
     }
-  }, [connection]);
+  }, [
+    connectionStr,
+    currentPage,
+    currentPageSize,
+    types,
+    queueName,
+    connection,
+  ]);
 
-  const fetchQueueJob = useCallback(
-    async (queueName = "", types = ["*"], page = 1, pageSize = 20) => {
-      if (queueName) {
-        setLoading(true);
-        const { data, meta } = await getQueueJobs(
-          queueName,
-          types,
-          page,
-          pageSize
-        );
-        setLoading(false);
-        setData(data);
-        setMeta(meta);
-        const totalPages = Math.ceil(meta.total / currentPageSize);
-        console.log("totalPages", totalPages);
-        if (page > totalPages && totalPages > 0) {
-          setCurrentPage(totalPages);
-        }
+  const fetchJobCount = useCallback(async () => {
+    if (queueName) {
+      const data = await getJobCounts();
+      setJobCounts(data);
+    }
+  }, [queueName, connectionStr]);
+
+  const fetchQueueJob = useCallback(async () => {
+    if (queueName) {
+      const { data, meta } = await getQueueJobs(
+        types,
+        currentPage,
+        currentPageSize
+      );
+      setData(data);
+      setMeta(meta);
+      const totalPages = Math.ceil(meta.total / currentPageSize);
+      console.log("totalPages", totalPages);
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
       }
-    },
-    [connectionStr, currentPage, currentPageSize, types]
-  );
+    }
+  }, [connectionStr, currentPage, currentPageSize, types, queueName]);
 
   const toggleActiveJobData = (id: string) => {
     if (activeIds.includes(id)) {
@@ -109,21 +135,25 @@ export const useQueueDetail = () => {
       if (currentPage !== pageSize) {
         setCurrentPageSize(pageSize);
       }
-      fetchQueueJob(queueName, types, page, pageSize);
+      fetchQueueJob();
     }
   };
 
   const toggleType = useCallback(
     (type: string) => {
-      let newTypes = [...types];
+      let newTypes = [...types.filter((type) => type !== "*")];
       if (types.includes(type)) {
         newTypes = newTypes.filter((item) => item !== type);
       } else {
         newTypes.push(type);
       }
 
+      if (newTypes.length === 0) {
+        newTypes.push("*");
+      }
+
       setTypes(newTypes);
-      fetchQueueJob(queueName, newTypes, currentPage, currentPageSize);
+      fetchQueueJob();
     },
     [queueName, currentPage, types, currentPageSize]
   );
@@ -131,22 +161,19 @@ export const useQueueDetail = () => {
   const removeJob = useCallback(
     async (jobId: string) => {
       if (queueName) {
-        const isDeleteOk = await deleteJob(queueName, jobId);
+        const isDeleteOk = await deleteJob(jobId);
         if (isDeleteOk) {
           setCurrentPage(1);
-          fetchQueueJob(queueName, types, 1, currentPageSize);
+          fetchQueueJob();
         }
       }
     },
     [queueName]
   );
 
-  const updateJobData = useCallback(
-    (queueName: string, jobId: string, newJobData: any) => {
-      updateJob(queueName, jobId, newJobData);
-    },
-    []
-  );
+  const updateJobData = useCallback((jobId: string, newJobData: any) => {
+    updateJob(jobId, newJobData);
+  }, []);
 
   const onChangeJobData = (data: any) => {
     setUpdatedJobData(data);
@@ -157,11 +184,21 @@ export const useQueueDetail = () => {
     setUpdatedJobData({});
   };
 
+  const onRetryJob = useCallback(
+    (jobId: string) => {
+      if (queueName) {
+        retryJob(jobId);
+      }
+    },
+    [connectionStr, queueName]
+  );
+
   return {
     data,
     meta,
     types,
     loading,
+    jobCounts,
     activeIds,
     queueName,
     editingJob,
@@ -171,6 +208,7 @@ export const useQueueDetail = () => {
 
     setTypes,
     removeJob,
+    onRetryJob,
     toggleType,
     onCancelEdit,
     setEditingJob,

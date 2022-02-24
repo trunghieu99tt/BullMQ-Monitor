@@ -22,12 +22,14 @@ const QueueDetail = () => {
     types,
     loading,
     queueName,
+    jobCounts,
     editingJob,
     currentPage,
     updatedJobData,
     currentPageSize,
 
     removeJob,
+    onRetryJob,
     toggleType,
     onCancelEdit,
     setEditingJob,
@@ -91,7 +93,7 @@ const QueueDetail = () => {
     },
     {
       title: "Attempts",
-      dataIndex: "attempt",
+      dataIndex: "attempts",
       width: "100px",
     },
     {
@@ -116,6 +118,15 @@ const QueueDetail = () => {
             >
               Edit
             </Button>
+            {record.status === "failed" && (
+              <Button
+                type="primary"
+                shape="round"
+                onClick={() => onRetryJob(record.id)}
+              >
+                Retry
+              </Button>
+            )}
             <Button
               type="primary"
               danger
@@ -137,7 +148,7 @@ const QueueDetail = () => {
         onOk={() =>
           queueName &&
           editingJob?.id &&
-          updateJobData(queueName, editingJob?.id, updatedJobData)
+          updateJobData(editingJob?.id, updatedJobData)
         }
         onCancel={() => onCancelEdit()}
       >
@@ -158,7 +169,7 @@ const QueueDetail = () => {
                 key={`${type}-${idx}`}
                 onClick={() => toggleType(type)}
               >
-                {type}
+                {type} ({jobCounts[type] || 0})
               </Button>
             );
           })}

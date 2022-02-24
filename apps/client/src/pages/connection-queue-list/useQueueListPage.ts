@@ -19,10 +19,12 @@ export const useQueueListPage = () => {
   const connection = useRecoilValue(
     connectionSelectorByConnectionId(connectionId)
   );
+
   const [redis, setRedis] = useRecoilState(redisState);
 
   const { getQueues } = useQueue({
     connectionStr: `${connection?.host}:${connection?.port}`,
+    queueName: "",
   });
 
   const fetchQueueListIntervalRef = useRef<any>();
@@ -31,27 +33,26 @@ export const useQueueListPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log("connection", connection);
     fetchQueues();
 
-    if (fetchQueueListIntervalRef?.current) {
-      clearInterval(fetchQueueListIntervalRef.current);
+    if (connection?.info) {
+      setRedis(connection?.info);
     }
 
-    fetchQueueListIntervalRef.current = setInterval(() => {
-      fetchQueues();
-    }, POLLING_INTERVAL);
+    // if (fetchQueueListIntervalRef?.current) {
+    //   clearInterval(fetchQueueListIntervalRef.current);
+    // }
+
+    // fetchQueueListIntervalRef.current = setInterval(() => {
+    //   fetchQueues();
+    // }, POLLING_INTERVAL);
 
     return () => {
       if (fetchQueueListIntervalRef?.current) {
         clearInterval(fetchQueueListIntervalRef.current);
       }
     };
-  }, [connection]);
-
-  useEffect(() => {
-    if (connection?.info) {
-      setRedis(connection?.info);
-    }
   }, [connection]);
 
   const fetchQueues = async () => {
