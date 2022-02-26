@@ -14,6 +14,16 @@ This helps you with monitoring the status of BullMQ queues and jobs.
 - view job data
 - edit job data
 - delete job
+- retry failed job
+
+### Screenshots
+
+Overview
+
+![Overview](./docs/overview.png)
+![Queue detail](./docs/detail.png)
+![Overview](./docs/detail-job.png)
+![Overview](./docs/redis-info.png)
 
 ### Develop
 
