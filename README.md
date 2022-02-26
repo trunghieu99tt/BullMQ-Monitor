@@ -21,9 +21,18 @@ This helps you with monitoring the status of BullMQ queues and jobs.
 Overview
 
 ![Overview](./docs/overview.png)
+
+List job of queue
+
 ![Queue detail](./docs/detail.png)
-![Overview](./docs/detail-job.png)
-![Overview](./docs/redis-info.png)
+
+Job detail
+
+![Job detail](./docs/detail-job.png)
+
+Redis info
+
+![Redis info](./docs/redis-info.png)
 
 ### Develop
 
