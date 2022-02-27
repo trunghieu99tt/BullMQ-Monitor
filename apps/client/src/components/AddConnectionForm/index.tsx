@@ -22,7 +22,7 @@ const AddConnectionForm = ({ onCancel }: Props) => {
         rules={[
           {
             required: true,
-            message: "Please input your connection name!",
+            message: "Please input your connection name !",
           },
         ]}
       >
